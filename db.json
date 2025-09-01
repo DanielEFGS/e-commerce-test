@@ -1,0 +1,40 @@
+{
+  "products": [
+    {
+      "id": "a7c6",
+      "name": "iPhone 15",
+      "price": 849990,
+      "stock": 10
+    },
+    {
+      "id": "a01f",
+      "name": "MacBook Pro",
+      "price": 2499990,
+      "stock": 5
+    },
+    {
+      "id": "0b53",
+      "name": "iPad Air",
+      "price": 649990,
+      "stock": 15
+    },
+    {
+      "id": "0ac2",
+      "name": "Apple Watch Series 9",
+      "price": 399990,
+      "stock": 20
+    },
+    {
+      "id": "f452",
+      "name": "AirPods Pro",
+      "price": 249990,
+      "stock": 25
+    },
+    {
+      "id": "aa65",
+      "name": "Mac Studio",
+      "price": 1999990,
+      "stock": 3
+    }
+  ]
+}

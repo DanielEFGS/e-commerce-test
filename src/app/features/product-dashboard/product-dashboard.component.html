@@ -1,0 +1,177 @@
+<div class="container-fluid py-4">
+  <div class="d-flex flex-column gap-2 flex-md-row justify-content-between align-items-center mb-4">
+    <h1 class="h2 mb-0">Gestión de Productos</h1>
+    <div class="d-flex gap-2">
+      <button class="btn btn-outline-secondary" (click)="resetDatabase()"
+        title="Resetear base de datos a valores iniciales">
+        <i class="bi bi-arrow-clockwise me-1"></i>
+        Resetear BD
+      </button>
+      <button class="btn btn-primary" (click)="openModal()">
+        <i class="bi bi-plus-lg me-1"></i>
+        Agregar Producto
+      </button>
+    </div>
+  </div>
+
+  <!-- Mensaje de error -->
+  <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show" role="alert">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Loading spinner -->
+  <div *ngIf="isLoading" class="d-flex justify-content-center align-items-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando productos...</span>
+    </div>
+    <span class="ms-2">Cargando productos...</span>
+  </div>
+
+  <!-- Tabla de productos -->
+  <div class="card" *ngIf="!isLoading">
+    <div class="card-header">
+      <h5 class="mb-0">Lista de Productos</h5>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-striped table-hover mb-0">
+          <thead class="table-dark">
+            <tr>
+              <th scope="col">Nombre</th>
+              <th scope="col">Precio</th>
+              <th scope="col">Stock</th>
+              <th scope="col" class="text-center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let product of products; trackBy: trackByProductId">
+              <td>
+                <strong>{{ product.name }}</strong>
+              </td>
+              <td>
+                <span class="fw-semibold text-success">{{ product.price | clpCurrency }}</span>
+              </td>
+              <td>
+                <span class="badge" 
+                      [class.bg-warning]="product.stock < 10" 
+                      [class.bg-success]="product.stock >= 10">
+                  {{ product.stock }} <span class="d-none d-md-inline-flex">unidades</span>
+                </span>
+              </td>
+              <td class="text-center">
+                <button class="btn btn-outline-danger btn-sm" 
+                        (click)="deleteProduct(product.id!)" 
+                        [disabled]="isLoading"
+                        title="Eliminar producto">
+                  <i class="bi bi-trash me-1 d-md-none"></i>
+                  <span class="d-none d-md-inline-flex">Eliminar</span>
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="products.length === 0">
+              <td colspan="4" class="text-center py-4 text-muted">
+                <i class="bi bi-inbox display-1 mb-3 d-block"></i>
+                No hay productos disponibles
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Template para modal de agregar producto -->
+<ng-template #productModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title">Agregar Nuevo Producto</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()">
+    </button>
+  </div>
+
+  <div class="modal-body">
+    <form [formGroup]="productForm" (ngSubmit)="onSubmit()">
+      <div class="mb-3">
+        <label for="name" class="form-label">Nombre del Producto *</label>
+        <input 
+          type="text" 
+          id="name" 
+          formControlName="name" 
+          class="form-control"
+          [class.is-invalid]="name?.invalid && name?.touched">
+        <div class="invalid-feedback" *ngIf="name?.invalid && name?.touched">
+          <div *ngIf="name?.errors?.['required']">El nombre es obligatorio</div>
+          <div *ngIf="name?.errors?.['minlength']">El nombre debe tener al menos 2 caracteres</div>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="price" class="form-label">Precio (CLP) *</label>
+        <input 
+          type="number" 
+          id="price" 
+          formControlName="price" 
+          class="form-control" 
+          step="1" 
+          min="1"
+          placeholder="Ej: 299990"
+          [class.is-invalid]="price?.invalid && price?.touched">
+        <div class="invalid-feedback" *ngIf="price?.invalid && price?.touched">
+          <div *ngIf="price?.errors?.['required']">El precio es obligatorio</div>
+          <div *ngIf="price?.errors?.['min']">El precio debe ser al menos $1 CLP</div>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="stock" class="form-label">Stock *</label>
+        <input 
+          type="number" 
+          id="stock" 
+          formControlName="stock" 
+          class="form-control" 
+          min="0"
+          [class.is-invalid]="stock?.invalid && stock?.touched">
+        <div class="invalid-feedback" *ngIf="stock?.invalid && stock?.touched">
+          <div *ngIf="stock?.errors?.['required']">El stock es obligatorio</div>
+          <div *ngIf="stock?.errors?.['min']">El stock no puede ser negativo</div>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">
+      Cancelar
+    </button>
+    <button 
+      type="button" 
+      class="btn btn-primary"
+      [disabled]="productForm.invalid"
+      (click)="onSubmit()">
+      Agregar Producto
+    </button>
+  </div>
+</ng-template>
+
+<!-- Template for delete confirmation modal -->
+<ng-template #deleteConfirmModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title text-danger">Confirmar Eliminación</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()">
+    </button>
+  </div>
+
+  <div class="modal-body">
+    <p>¿Estás seguro de que quieres eliminar este producto?</p>
+    <p class="text-danger small">Esta acción no se puede deshacer.</p>
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">
+      Cancelar
+    </button>
+    <button type="button" class="btn btn-danger" (click)="confirmDelete()">
+      Eliminar
+    </button>
+  </div>
+</ng-template>

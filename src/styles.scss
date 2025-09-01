@@ -1,0 +1,17 @@
+body {
+  background-color: #f8f9fa;
+}
+
+.currency-text {
+  font-weight: 600;
+  color: #28a745;
+}
+
+.stock-badge {
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.table tbody tr:hover {
+  background-color: rgba(0, 123, 255, 0.05);
+}
